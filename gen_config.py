@@ -24,7 +24,6 @@ Generates C/C++ code to load/store application config based on a spec file.
 
 import yaml
 import json
-import toml
 import logging
 import argparse
 import os
