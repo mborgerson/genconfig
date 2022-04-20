@@ -94,10 +94,10 @@ public:
     }
 
     CNode(std::string name, std::vector<CNode> children = {})
-    : name(name), type(CNodeType::Table), children(children) {}
+    : type(CNodeType::Table), name(name), children(children) {}
 
     CNode(std::string name, CNodeType type)
-    : name(name), type(type) {}
+    : type(type), name(name) {}
 
     //
     // Get child node by name
@@ -156,7 +156,7 @@ public:
                 printf("%s (d=%s of { ",
                     data_enum.values[data_enum.val].c_str(),
                     data_enum.values[data_enum.default_val].c_str());
-                for (int i = 0; i < data_enum.values.size(); i++) {
+                for (unsigned int i = 0; i < data_enum.values.size(); i++) {
                     if (i) printf(", ");
                     printf("%s ", data_enum.values[i].c_str());
                 }
@@ -381,7 +381,7 @@ public:
                 int *pc = (int *)((uint8_t *)s + serialized.count_offset);
                 *pc = children.size();
                 p = (uint8_t *) *(void**)p;
-                for (int i = 0; i < children.size(); i++) {
+                for (unsigned int i = 0; i < children.size(); i++) {
                     children[i].store_to_struct(p);
                     p += serialized.size;
                 }
