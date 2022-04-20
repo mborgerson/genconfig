@@ -517,7 +517,9 @@ public:
                 if (c.type == Table || !c.differs_from_default()) continue;
 
                 if (!printed_table_header && !inline_table) {
-                    s += "[" + cpath + "]\n";
+                    if (cpath.length()) {
+                        s += "[" + cpath + "]\n";
+                    }
                     printed_table_header = true;
                 }
 
