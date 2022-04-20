@@ -2,6 +2,10 @@ GenConfig
 =========
 Aims to provide less-painful C/C++ app configuration support.
 
+![](infographic.png)
+
+Motivation
+----------
 Created because all of the config systems I have used (or created) in the past had too many pain points, like:
 - Requiring things to be defined in multiple places
 - Not using standard, human-friendly configuration formats
@@ -20,14 +24,15 @@ This system attempts to alleviate those pain points and make configuration suck 
 - Usable in C/C++, without having to do any lookups or extra validation: just read from a `struct`
 - Supports saving configuration deltas
 
-How it works (take a look at `example`):
+How it Works
+------------
 - You define the options you want for your app in a spec file
 - You run `gen_config.py` to generate a header file with `struct config` definition
 - User runs your app, providing their settings in a `.toml` file matching your specification
-	- Your code calls a single function that parses the config file to the `config` structure
-	- Your code accesses the config by just reading from the `config` struct
+	- Your code calls a function to load, parse, and store the config file to the `config` structure
+	- Your code accesses the config by just reading from and writing to the `config` struct
 	- Your code changes `config` structure in response to some user action
-	- Your code calls another function to save the config delta to the user's `.toml` config file
+	- Your code calls a function to save the config delta to the user's `.toml` config file
 - You retain a bit more hair that you might have ripped out using/creating another configuration system
 - Your app makes lots of money and you send some my way because you support open-source development. Thanks, that's nice of you.
 
