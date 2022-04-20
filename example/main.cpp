@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	// Update some config
 	// config_tree.set_defaults();
 	add_supplier(&s, 0, "Fred's Apples LLC");
-	set_product_price(&s, 1, 1000.00);
+	set_product_price(&s, 1, 995.75);
 
 	// Sync config from structure
 	config_tree.update_from_struct(&s);
