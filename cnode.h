@@ -570,7 +570,12 @@ public:
             break;
         }
         case Boolean: s += data.boolean.val ? "true" : "false"; break;
-        case Enum:    s += "'" + data_enum.values[data_enum.val] + "'"; break;
+        case Enum: {
+            std::ostringstream oss;
+            oss << toml::value<std::string>(data_enum.values[data_enum.val]);
+            s += oss.str();
+            break;
+        }
         case Integer: s += string_format("%d", data.integer.val); break;
         case Number:  s += string_format("%g", data.number.val); break;
         case String: {
