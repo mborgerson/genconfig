@@ -569,7 +569,12 @@ public:
         case Enum:    s += "\"" + data_enum.values[data_enum.val] + "\""; break;
         case Integer: s += string_format("%d", data.integer.val); break;
         case Number:  s += string_format("%g", data.number.val); break;
-        case String:  s += "\"" + string.val + "\""; break; // FIXME: Fails to escape chars
+        case String: {
+            std::ostringstream oss;
+            oss << toml::value<std::string>(string.val);
+            s += oss.str();
+            break;
+        }
         default: assert(false);
         }
 
