@@ -376,10 +376,10 @@ public:
 
         switch (type) {
         case Array: {
+            int *pc = (int *)((uint8_t *)s + serialized.count_offset);
+            *pc = children.size();
             if (children.size()) {
                 *(void**)p = calloc(children.size(), serialized.size);
-                int *pc = (int *)((uint8_t *)s + serialized.count_offset);
-                *pc = children.size();
                 p = (uint8_t *) *(void**)p;
                 for (unsigned int i = 0; i < children.size(); i++) {
                     children[i].store_to_struct(p);
