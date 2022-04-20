@@ -385,6 +385,8 @@ public:
                     children[i].store_to_struct(p);
                     p += serialized.size;
                 }
+            } else {
+                *(void**)p = NULL;
             }
             break;
         }
