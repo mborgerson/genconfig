@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
