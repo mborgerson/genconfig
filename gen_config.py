@@ -120,11 +120,11 @@ class ConfigNode:
             cpath = path
         s = ''
         if self.type == 'enum':
-            s += f'enum {self.enum_name(cpath)} {{\n'
-            for v in self.values:
-                s += '\t' + self.enum_value(cpath, v) + ',\n'
-            s += '\t'+self.enum_count(cpath) + '\n'
-            s += '};\n\n'
+            s += f'enum {self.enum_name(cpath)}_ {{\n'
+            for i, v in enumerate(self.values):
+                s += '\t' + self.enum_value(cpath, v) + f' = {i},\n'
+            s += '\t'+self.enum_count(cpath) + f' = {len(self.values)}\n'
+            s += f'}};\ntypedef int {self.enum_name(cpath)};\n\n'
 
         for c in self.children:
             s += c.gen_c_enums(cpath)
@@ -147,7 +147,7 @@ class ConfigNode:
         elif self.type == 'array':
             s = f'struct {self.name}_item *'
         elif self.type == 'enum':
-            s = f'enum {self.enum_name(path + "." + self.name)} '
+            s = f'{self.enum_name(path + "." + self.name)} '
         else:
             assert False
 
