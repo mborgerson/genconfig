@@ -94,6 +94,20 @@ public:
         serialized = other.serialized;
     }
 
+    CNode& operator=(const CNode& other)
+    {
+        type = other.type;
+        name = std::string(other.name);
+        children = std::vector<CNode>(other.children);
+        array_item_type = copy_unique(other.array_item_type);
+        data = other.data;
+        data_enum = other.data_enum;
+        string = other.string;
+        serialized = other.serialized;
+
+        return *this;
+    }
+
     CNode(std::string name, std::vector<CNode> children = {})
     : type(CNodeType::Table), name(name), children(children) {}
 
@@ -308,6 +322,11 @@ public:
     //
     // Set enumerated type value
     //
+    void set_enum_by_index(int idx)
+    {
+        data_enum.val = idx;
+    }
+
     void set_enum_tv(std::string v, const toml::source_region &from, std::string path)
     {
         int idx = enum_str_to_int(v);
@@ -323,12 +342,17 @@ public:
         report_line_col(from);
         fprintf(stderr, "\n");
 #endif
-        data_enum.val = idx;
+        set_enum_by_index(idx);
     }
 
     //
     // Set integer value
     //
+    void set_integer(int v)
+    {
+        data.integer.val = v;
+    }
+
     void set_integer_tv(int v, const toml::source_region &from, std::string path)
     {
 #if DEBUG
@@ -336,12 +360,17 @@ public:
         report_line_col(from);
         fprintf(stderr, "\n");
 #endif
-        data.integer.val = v;
+        set_integer(v);
     }
 
     //
     // Set number value
     //
+    void set_number(float v)
+    {
+        data.number.val = v;
+    }
+
     void set_number_tv(float v, const toml::source_region &from, std::string path)
     {
 #if DEBUG
@@ -349,12 +378,17 @@ public:
         report_line_col(from);
         fprintf(stderr, "\n");
 #endif
-        data.number.val = v;
+        set_number(v);
     }
 
     //
     // Set string value
     //
+    void set_string(std::string v)
+    {
+        string.val = v;
+    }
+
     void set_string_tv(std::string v, const toml::source_region &from, std::string path)
     {
 #if DEBUG
@@ -362,7 +396,7 @@ public:
         report_line_col(from);
         fprintf(stderr, "\n");
 #endif
-        string.val = v;
+        set_string(v);
     }
 
     //
@@ -402,6 +436,45 @@ public:
             }
             break;
         default: assert(false);
+        }
+    }
+
+    //
+    // Free any allocations made
+    //
+    void free_allocations(void *s)
+    {
+        uint8_t *p = (uint8_t *)s + serialized.offset;
+#if DEBUG
+        fprintf(stderr, "Free %s offset %d @ %p\n", name.c_str(), serialized.offset, p);
+#endif
+
+        switch (type) {
+        case Array: {
+            int *pc = (int *)((uint8_t *)s + serialized.count_offset);
+            *pc = 0;
+            if (children.size()) {
+                uint8_t *p_c = (uint8_t *) *(void**)p;
+                for (unsigned int i = 0; i < children.size(); i++) {
+                    children[i].free_allocations(p_c);
+                    p_c += serialized.size;
+                }
+
+                free(*(void**)p);
+            }
+            *(void**)p = NULL;
+            break;
+        }
+        case String:
+            free(*(void**)p);
+            *(void**)p = NULL;
+            break;
+        case Table:
+            for (auto &c : children) {
+                c.free_allocations(s);
+            }
+            break;
+        default: break;
         }
     }
 
