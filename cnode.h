@@ -33,7 +33,7 @@
 #include <vector>
 
 // 3rdparty
-#include <toml.hpp>
+#include <toml++/toml.h>
 
 #ifndef DEBUG
 #define DEBUG 0
