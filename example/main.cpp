@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <toml.hpp>
+#include <toml++/toml.h>
 #include <cnode.h>
 
 #define DEFINE_CONFIG_TREE
