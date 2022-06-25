@@ -8,4 +8,4 @@ config.h: config_spec.yml
 	python ../gen_config.py config_spec.yml config.h
 
 example: main.cpp config.h tomlplusplus
-	g++ -o $@ -g -std=c++17 -Itomlplusplus -I.. main.cpp
+	g++ -o $@ -g -std=c++17 -Itomlplusplus/include -I.. main.cpp
