@@ -562,6 +562,25 @@ public:
     }
 
     //
+    // Set the current value at every node to the node's default value
+    //
+    void reset_to_defaults()
+    {
+        switch (type) {
+        case Array:   // XXX: Setting array defaults not supported.
+                      //      You'd need to change array_item_type.
+                      break;
+        case Boolean: data.boolean.val = data.boolean.default_val; break;
+        case Enum:    data_enum.val = data_enum.default_val; break;
+        case Integer: data.integer.val = data.integer.default_val; break;
+        case Number:  data.number.val = data.number.default_val; break;
+        case String:  string.val = string.default_val; break;
+        case Table:   for (auto &c : children) c.reset_to_defaults(); break;
+        default: assert(false);
+        }
+    }
+
+    //
     // Generate and return a TOML-formatted configuration for nodes that differ from their default value
     //
     // Note: Arrays of size > 0 are always considered differing
