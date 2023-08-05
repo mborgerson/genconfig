@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all clean
 all: example
 
 tomlplusplus:
@@ -9,3 +9,6 @@ config.h: config_spec.yml
 
 example: main.cpp config.h tomlplusplus
 	g++ -o $@ -g -std=c++17 -Itomlplusplus/include -I.. main.cpp
+
+clean:
+	rm -f config.h example config_out.toml
