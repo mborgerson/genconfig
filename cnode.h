@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#pragma once
 
 #include <stdio.h>
 #include <limits.h>
@@ -669,11 +670,11 @@ public:
 // Helpers to generate CNodes
 //
 
-CNode ctab(std::string name, std::vector<CNode> children) {
+static inline CNode ctab(std::string name, std::vector<CNode> children) {
     return CNode(name, children);
 }
 
-CNode carray(size_t o, size_t oc, size_t sz, std::string name, CNode item_type) {
+static inline CNode carray(size_t o, size_t oc, size_t sz, std::string name, CNode item_type) {
     CNode node(name, Array);
     node.array_item_type = std::make_unique<CNode>(item_type);
     node.serialized.offset = o;
@@ -682,14 +683,14 @@ CNode carray(size_t o, size_t oc, size_t sz, std::string name, CNode item_type) 
     return node;
 }
 
-CNode cbool(size_t o, std::string name, bool val = false) {
+static inline CNode cbool(size_t o, std::string name, bool val = false) {
     CNode node(name, Boolean);
     node.data.boolean = { val, val };
     node.serialized.offset = o;
     return node;
 }
 
-CNode cenum(size_t o, std::string name, std::vector<std::string> values, std::string value) {
+static inline CNode cenum(size_t o, std::string name, std::vector<std::string> values, std::string value) {
     CNode node(name, Enum);
     node.data_enum.values = values;
     int idx = node.enum_str_to_int(value);
@@ -699,21 +700,21 @@ CNode cenum(size_t o, std::string name, std::vector<std::string> values, std::st
     return node;
 }
 
-CNode cinteger(size_t o, std::string name, int val = 0, int min = INT_MIN, int max = INT_MAX) {
+static inline CNode cinteger(size_t o, std::string name, int val = 0, int min = INT_MIN, int max = INT_MAX) {
     CNode node(name, Integer);
     node.data.integer = { min, max, val, val };
     node.serialized.offset = o;
     return node;
 }
 
-CNode cnumber(size_t o, std::string name, float val = 0, float min = -FLT_MAX, float max = +FLT_MAX) {
+static inline CNode cnumber(size_t o, std::string name, float val = 0, float min = -FLT_MAX, float max = +FLT_MAX) {
     CNode node(name, Number);
     node.data.number = { min, max, val, val };
     node.serialized.offset = o;
     return node;
 }
 
-CNode cstring(size_t o, std::string name, std::string val) {
+static inline CNode cstring(size_t o, std::string name, std::string val) {
     CNode node(name, String);
     node.string = { val, val };
     node.serialized.offset = o;
