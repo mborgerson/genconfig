@@ -603,6 +603,10 @@ public:
             }
 
             if (inline_table) {
+                if (!name.empty()) {
+                    s += name;
+                    s += " = ";
+                }
                 s += "{ ";
             }
 
@@ -631,6 +635,7 @@ public:
 
             for (auto &c : children) {
                 if (c.type != Table || !c.differs_from_default()) continue;
+                if (inline_table && i++) s += ", ";
                 s += c.generate_delta_toml(cpath, inline_table, depth, false);
             }
 
