@@ -1,0 +1,14 @@
+app:
+  name:
+    type: string
+    default: "DefaultApp"
+  version:
+    type: int
+    default: 1
+  feature_enabled:
+    type: bool
+    default: false
+  log_level:
+    type: enum
+    values: ['debug', 'info', 'warn', 'error']
+    default: 'info'

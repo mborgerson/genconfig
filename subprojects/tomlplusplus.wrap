@@ -1,0 +1,7 @@
+[wrap-git]
+url = https://github.com/marzer/tomlplusplus.git
+revision = v3.4.0
+depth = 1
+
+[provide]
+tomlplusplus = tomlplusplus_dep
