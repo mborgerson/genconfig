@@ -585,9 +585,16 @@ public:
     //
     // Note: Arrays of size > 0 are always considered differing
     //
-    std::string generate_delta_toml(std::string path = "", bool inline_table = false, int depth = 0, bool root = true)
+    std::string generate_delta_toml(std::string path = "", bool inline_table = false, int depth = 0, bool root = true) {
+        return generate_toml(true, path, inline_table, depth, root);
+    }
+
+    //
+    // Generate and return a TOML-formatted configuration, optionally suppressing nodes that match the default value
+    //
+    std::string generate_toml(bool suppress_defaults, std::string path = "", bool inline_table = false, int depth = 0, bool root = true)
     {
-        if (!differs_from_default()) {
+        if (suppress_defaults && !differs_from_default()) {
             return "";
         }
 
@@ -612,7 +619,7 @@ public:
 
             int i = 0;
             for (auto &c : children) {
-                if (c.type == Table || !c.differs_from_default()) continue;
+                if (c.type == Table || (suppress_defaults && !c.differs_from_default())) continue;
 
                 if (!printed_table_header && !inline_table) {
                     if (cpath.length()) {
@@ -622,7 +629,7 @@ public:
                 }
 
                 if (inline_table && i++) s += ", ";
-                s += c.generate_delta_toml("", inline_table, depth, false);
+                s += c.generate_toml(suppress_defaults, "", inline_table, depth, false);
 
                 if (!inline_table) {
                     s += "\n";
@@ -634,9 +641,9 @@ public:
             }
 
             for (auto &c : children) {
-                if (c.type != Table || !c.differs_from_default()) continue;
+                if (c.type != Table || (suppress_defaults && !c.differs_from_default())) continue;
                 if (inline_table && i++) s += ", ";
-                s += c.generate_delta_toml(cpath, inline_table, depth, false);
+                s += c.generate_toml(suppress_defaults, cpath, inline_table, depth, false);
             }
 
             if (inline_table) {
@@ -661,7 +668,7 @@ public:
                     s += ",\n";
                 }
                 for (int d = 0; d < (depth+1); d++) s += "    ";
-                s += c.generate_delta_toml("", true, depth + 1, false);
+                s += c.generate_toml(suppress_defaults, "", true, depth + 1, false);
             }
             s += "\n";
             for (int d = 0; d < (depth+1); d++) s += "    ";
