@@ -194,7 +194,8 @@ class ConfigNode:
 
 class Config:
     def __init__(self, path: str, root_node_name: str):
-        doc = open(path).read()
+        with open(path) as f:
+            doc = f.read()
         doc = doc.replace('\t', '  ')  ## PyYAML doesn't like tabs
         log.debug('Input config contents:\n%s', doc)
         self.root = ConfigNode(root_node_name, yaml.load(doc, yaml.Loader))
