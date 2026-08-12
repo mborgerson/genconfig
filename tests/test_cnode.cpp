@@ -242,6 +242,35 @@ TEST(test_array_store_to_struct) {
   tree.free_allocations(&cfg);
 }
 
+TEST(test_generate_toml_preserve_defaults) {
+  CNode tree =
+      ctab("config",
+           {cbool(offsetof(DummyConfig, flag), "flag", true),
+            cinteger(offsetof(DummyConfig, count), "count", 42),
+            cnumber(offsetof(DummyConfig, ratio), "ratio", 3.14f),
+            cstring(offsetof(DummyConfig, title), "title", "hello"),
+            cenum(offsetof(DummyConfig, choice), "choice", {"A", "B"}, "B")});
+
+  std::string toml_unsuppressed = tree.generate_toml(false);
+  const char *expected_unsuppressed_toml =
+      "flag = true\ncount = 42\nratio = 3.14\ntitle = 'hello'\nchoice = "
+      "'B'\n\n";
+  ASSERT_STREQ(toml_unsuppressed, expected_unsuppressed_toml);
+}
+
+TEST(test_generate_toml_suppress_defaults) {
+  CNode tree =
+      ctab("config",
+           {cbool(offsetof(DummyConfig, flag), "flag", true),
+            cinteger(offsetof(DummyConfig, count), "count", 42),
+            cnumber(offsetof(DummyConfig, ratio), "ratio", 3.14f),
+            cstring(offsetof(DummyConfig, title), "title", "hello"),
+            cenum(offsetof(DummyConfig, choice), "choice", {"A", "B"}, "B")});
+
+  std::string toml_suppressed = tree.generate_toml(true);
+  ASSERT_TRUE(toml_suppressed.empty());
+}
+
 TEST(test_toml_update) {
   DummyConfig cfg = {false, 0, 0.0f, nullptr, 0};
 
@@ -341,10 +370,41 @@ TEST(test_generate_delta_toml_all_non_default_params) {
   tree.free_allocations(&cfg);
 }
 
+TEST(test_generate_toml_table_retaining_defaults_inline_false) {
+  DummyConfig cfg = {true, 42, 3.14f, nullptr, 0};
+  CNode tree = ctab(
+      "config",
+      {ctab("section", {cbool(offsetof(DummyConfig, flag), "flag", true),
+                        cinteger(offsetof(DummyConfig, count), "count", 42)})});
+  tree.store_to_struct(&cfg);
+
+  std::string toml_out = tree.generate_toml(false, "", false);
+  const char *expected = "[section]\nflag = true\ncount = 42\n\n";
+  ASSERT_STREQ(toml_out, expected);
+
+  tree.free_allocations(&cfg);
+}
+
+TEST(test_generate_toml_table_retaining_defaults_inline_true) {
+  DummyConfig cfg = {true, 42, 3.14f, nullptr, 0};
+  CNode tree =
+      ctab("section", {cbool(offsetof(DummyConfig, flag), "flag", true),
+                       cinteger(offsetof(DummyConfig, count), "count", 42)});
+  tree.store_to_struct(&cfg);
+
+  std::string toml_out = tree.generate_toml(false, "", true);
+  const char *expected = "section = { flag = true, count = 42}";
+  ASSERT_STREQ(toml_out, expected);
+
+  tree.free_allocations(&cfg);
+}
+
 int main() {
   RUN_TEST(test_primitives_store);
   RUN_TEST(test_primitives_update);
   RUN_TEST(test_generate_delta_toml);
+  RUN_TEST(test_generate_toml_preserve_defaults);
+  RUN_TEST(test_generate_toml_suppress_defaults);
   RUN_TEST(test_array_delta_toml_empty);
   RUN_TEST(test_array_delta_toml_single_default);
   RUN_TEST(test_array_delta_toml_multi_default);
@@ -356,7 +416,8 @@ int main() {
   RUN_TEST(test_generate_delta_toml_non_zero_depth);
   RUN_TEST(test_generate_delta_toml_not_root);
   RUN_TEST(test_generate_delta_toml_all_non_default_params);
+  RUN_TEST(test_generate_toml_table_retaining_defaults_inline_false);
+  RUN_TEST(test_generate_toml_table_retaining_defaults_inline_true);
   std::cout << "All CNode tests passed!" << std::endl;
   return 0;
 }
-
