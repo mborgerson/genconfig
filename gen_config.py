@@ -22,11 +22,13 @@
 Generates C/C++ code to load/store application config based on a spec file.
 """
 
+import toml
 import yaml
 import json
 import logging
 import argparse
 import os
+import pathlib as pl
 
 from typing import Optional, Sequence, Mapping, Any
 
@@ -103,6 +105,16 @@ class ConfigNode:
         for c in self.children:
             s += c.__str__(depth=depth+1)
         return s
+
+    def __dict__(self):
+        d = {}
+        if self.type != "table":
+            d[self.name] = self.value
+            return d
+        d[self.name] = {}
+        for c in self.children:
+            d[self.name].update(c.__dict__())
+        return d
 
     def enum_name(self, path: str) -> str:
         return path.replace('.', '_').upper()
@@ -272,13 +284,38 @@ class Config:
                 + self.root.gen_c_enums()
                 + self.root.gen_c_struct())
 
+    def __dict__(self):
+        d = {}
+        for c in self.root.children:
+            d.update(c.__dict__())
+        return d
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('spec', help='Input config specification path')
     ap.add_argument('output', help='Output config header path')
+    ap.add_argument('--example', help='Generate an example toml file and output to the specified path',
+                    type=str, required=False)
     ap.add_argument('--struct', help='Name of generated config structure', required=False, default='config')
     args = ap.parse_args()
+
+    in_path = pl.Path(args.spec).expanduser()
+    out_path = pl.Path(args.output).expanduser()
+    if not in_path.exists():
+        print("The specified yaml config path does not exist!")
+        exit(1)
+    if not in_path.is_file():
+        print("The specified yaml config path is not a file!")
+        exit(1)
+    if not out_path.parent.is_dir():
+        print(f"The {out_path.parent.as_posix()} is not a directory!")
+        exit(1)
+    if args.example:
+        example_path = pl.Path(args.example).expanduser()
+        if not example_path.parent.is_dir():
+            print(f"Example path {example_path.parent.as_posix()} is not a directory!")
+            exit(2)
+
     c = Config(args.spec, args.struct)
 
     header_name = args.struct.upper() + '_H'
@@ -297,6 +334,12 @@ def main():
 
     with open(args.output, 'w') as f:
         f.write(s)
+
+    if args.example:
+        example_path = pl.Path(args.example).expanduser()
+
+        with example_path.open("w+") as f:
+            toml.dump(c.__dict__(), f)
 
 if __name__ == '__main__':
     main()
